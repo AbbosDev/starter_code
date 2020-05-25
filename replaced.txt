@@ -1,0 +1,59 @@
+"""
+@app.route('/venues')
+def venues():
+	# TODO: replace with real venues data.
+	#       num_shows should be aggregated based on number of upcoming shows per venue.
+	
+	data=[{ "city": "San Francisco", "state": "CA", "venues": [{ "id": 1, "name": "The Musical Hop", "num_upcoming_shows": 0, }, { "id": 3, "name": "Park Square Live Music & Coffee", "num_upcoming_shows": 1, }]}, { "city": "New York", "state": "NY", "venues": [{ "id": 2, "name": "The Dueling Pianos Bar", "num_upcoming_shows": 0, }] }]
+	
+	
+	areas = db.session.query(Venue.city, Venue.state).distinct(Venue.city, Venue.state)
+	data = []
+	for area in areas:
+		areas = Venue.query.filter_by(state=area.state).filter_by(city=area.city).all()
+		venues = []
+		for venue in areas:
+			venues.append({ 'id':venue.id, 'name': venue.name })
+			for show in venues:
+				upcoming_shows = Show.query(Show).filter_by(venue_id=venue.id).filter(Show.start_time.between(datetime.now())).count()
+				print(upcoming_shows)
+				data.append({ 'city':area.city, 'state':area.state, 'venues':venues, 'num_upcoming_shows':upcoming_shows })
+
+	#venue_data.append({ 'id':venue.id, 'name':venue.name, 'num_upcoming_shows': len(db.session.query(Show).filter(Show.show_date>datetime.now()).all())})
+
+	return render_template('pages/venues.html', areas=data)
+
+
+@app.route('/venues/search', methods=['POST'])
+def search_venues():
+	# TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
+	# seach for Hop should return "The Musical Hop".
+	# search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"	
+	response={
+		"count": 1, "data": [{
+			"id": 2, "name": "The Dueling Pianos Bar", "num_upcoming_shows": 0,
+		}]
+	}
+	
+	error = False
+
+	try:
+		venue_name = request.form['search_term', None]
+		search = "%{}%".format(venue_name)
+		list_venues = Venue.query.filter(Venue.name.like(search)).all()
+		count_venues = len(venues)
+		response = { 'count': count_venues, 'data': [v.serialize for v in list_venues] }
+	except:
+		error = True
+		db.session.rollback()
+
+		print(sys.exc_info())
+
+	finally:
+		db.session.close()
+
+	if error:
+		abort(400)
+	else:
+		return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
+"""
