@@ -2,6 +2,8 @@
 # Imports
 #----------------------------------------------------------------------------#
 
+# Abbas Al-Akashi
+
 import json
 import dateutil.parser
 import babel
@@ -429,21 +431,21 @@ def search_artists():
   # search for "band" should return "The Wild Sax Band".
   
   search_term = request.form.get('search_term', None)
-  venues = Artist.query.filter(Artist.name.match("'%{}%'".format(search_term))).all()
-  print("FOUND: ", venues)
-  count_venues = len(venues)
+  artist = Artist.query.filter(Artist.name.match("'%{}%'".format(search_term))).all()
+  print("FOUND: ", artist)
+  count_artist = len(artist)
   
-  print("COUNTED THIS MANY VENUES: ", count_venues)
+  print("COUNTED THIS MANY Artist: ", count_artist)
 	
   upcoming_shows = 0
 	
   response = []
-  for us in venues:
+  for us in artist:
     upcoming_shows = Show.query.filter_by(artist_id=us.id).filter(Show.start_time >= datetime.now()).count()
   
   #response.append({"count": count_venues, "data": us, "num_upcoming_shows": upcoming_shows })
   
-  response = { "count": count_venues, "data": [v for v in venues], "num_upcoming_shows": upcoming_shows }
+  response = { "count": count_artist, "data": [a for a in artist], "num_upcoming_shows": upcoming_shows }
   
   return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
 
@@ -464,7 +466,7 @@ def show_artist(artist_id):
   # TODO: replace with real venue data from the venues table, using venue_id
   
   
-  venue = Artist.query.filter(Artist.id == artist_id).one_or_none()
+  art = Artist.query.filter(Artist.id == artist_id).one_or_none()
   #past_shows, upcoming_shows
   shows = Show.query.filter(Show.artist_id==artist_id).all()
   past_shows =[]
@@ -482,7 +484,7 @@ def show_artist(artist_id):
               "artist_name":show.artist.name, "start_time": show.start_time}
               upcoming_shows.append(upcoming_show)
 
-  return render_template('pages/show_artist.html', artist=venue, upcoming_shows=upcoming_shows, past_shows = past_shows)
+  return render_template('pages/show_artist.html', artist=art, upcoming_shows=upcoming_shows, past_shows = past_shows)
   #return render_template('pages/show_venue.html', venue=venue, upcoming_shows=upcoming_shows, past_shows=past_shows)
 """
   data1={
@@ -687,9 +689,9 @@ def create_artist_submission():
     genres_ven = request.form.get('genres')
     facebook = request.form.get('facebook_link')
     
-    venue_list = Artist(name = ven_name, city = city_name, state = state_name, phone = phone_nbr, genres = genres_ven, facebook_link = facebook)
+    art_list = Artist(name = ven_name, city = city_name, state = state_name, phone = phone_nbr, genres = genres_ven, facebook_link = facebook)
 
-    db.session.add(venue_list)
+    db.session.add(art_list)
 
     db.session.commit()
 
@@ -700,7 +702,7 @@ def create_artist_submission():
     # TODO: on unsuccessful db insert, flash an error instead.
     # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
     db.session.rollback()
-    flash('AN ERROR OCCURED. VENUE ' + request.form['name'] + ' COULD NOT BE LISTED.')
+    flash('AN ERROR OCCURED. ART ' + request.form['name'] + ' COULD NOT BE LISTED.')
     print("THERE HAS BEEN AN ERROR")
 
   finally:
